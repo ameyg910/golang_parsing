@@ -43,21 +43,21 @@ func main() {
 		log.Fatal("Please provide the path to the XLSX file as a command-line argument.")
 	}
 
-	filePath := os.Args[1]
-	f, err := excelize.OpenFile(filePath)
+	filePath := os.Args[1] 
+	f, err := excelize.OpenFile(filePath) // Opening the file for the task to be executed
 	if err != nil {
 		log.Fatalf("Failed to open file: %s", err)
 	}
-	defer f.Close()
+	defer f.Close() // closing the file after the required operations are executed.
 
-	rows, err := f.GetRows("CSF111_202425_01_GradeBook")
-	if err != nil {
+	rows, err := f.GetRows("CSF111_202425_01_GradeBook") // Reads all Rows from the given xlsx file
+	if err != nil { // if not then it shall throw the given error
 		log.Fatalf("Failed to get rows: %s", err)
 	}
 
-	var records []Student_Record
-	var discrepancies []string
-	branchAverages := make(map[string]BranchAverage)
+	var records []Student_Record // dynamic array of the S_R struct type (initializes to nil) created to store student records
+	var discrepancies []string // DA to store all the inconsistencies in the total scores
+	branchAverages := make(map[string]BranchAverage) // Stores branch-wise total and number of students
 
 	// Branch Code Mapping
 	branchMapping := map[string]string{
@@ -72,14 +72,14 @@ func main() {
 
 	for i, row := range rows {
 		if i == 0 {
-			continue
+			continue // The top Header row shall be skipped 
 		}
 
-		if len(row) < 11 {
+		if len(row) < 11 { // Skipping rows with insufficient data (11 cols should be there)
 			continue 
 		}
 
-		record, err := parseRow(row)
+		record, err := parseRow(row) // Row -> Student_Record object 
 		if err != nil {
 			log.Printf("error parsing row %d: %s", i+1, err)
 			continue
