@@ -86,14 +86,14 @@ func main() {
 		}
 
 		computedTotal_Score := record.Quiz + record.MidSem + record.LabTest + record.WeeklyLabs + record.PreCompre + record.Compre
-		if computedTotal_Score != record.Total_Score {
+		if computedTotal_Score != record.Total_Score { // if sum of individual scores != recorded total, add it to discrepancies 
 			discrepancies = append(discrepancies, fmt.Sprintf("Discrepancy for Emplid %s: Computed Total_Score %.2f != Recorded Total_Score %.2f", record.Emplid, computedTotal_Score, record.Total_Score))
 		}
 
 		records = append(records, record)
 
 		if len(record.CampusID) >= 6 && record.CampusID[:4] == "2024" {
-			branchCode := record.CampusID[4:6] 
+			branchCode := record.CampusID[4:6] // Branch code extraction
 
 			if branchName, exists := branchMapping[branchCode]; exists {
 				ba := branchAverages[branchName]
@@ -101,7 +101,7 @@ func main() {
 				ba.Total_Score += record.Total_Score
 				ba.totalnoofstudents++
 				branchAverages[branchName] = ba
-			}
+			}// iterating, Updating the branch's total scores and no.of students 
 		}
 	}
 
@@ -114,7 +114,7 @@ func main() {
 		preCompreSum += record.PreCompre
 		compreSum += record.Compre
 		Total_ScoreSum += record.Total_Score
-	}
+	}// sum of all the test formats 
 
 	numRecords := float64(len(records))
 	quizAvg := quizSum / numRecords
@@ -123,7 +123,7 @@ func main() {
 	weeklyLabsAvg := weeklyLabsSum / numRecords
 	preCompreAvg := preCompreSum / numRecords
 	compreAvg := compreSum / numRecords
-	Total_ScoreAvg := Total_ScoreSum / numRecords
+	Total_ScoreAvg := Total_ScoreSum / numRecords // average computation 
 
 	if len(discrepancies) > 0 {
 		fmt.Println("Discrepancies found:")
@@ -162,7 +162,7 @@ func main() {
 func parseRow(row []string) (Student_Record, error) {
 	var record Student_Record
 	var err error
-
+    // conversion of ASCII to integer and checking for invalid items (if any)
 	record.SlNo, err = strconv.Atoi(row[0])
 	if err != nil {
 		return record, fmt.Errorf("invalid Sl No: %s", row[0])
