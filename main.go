@@ -1,3 +1,12 @@
+/*
+My explanation for the code in few sentences: 
+1) Iterating through rows, checking for incomplete entries and the top header and skipping them
+2)Row values -> Appropriate data types and storing them in the Student_Record structure
+3)Checking the Total_Score by calculating and checking for discrepancies and then removing them
+4) Creating Average variables for every test format and then computing averages for them
+5) Calculating Branch wise average was tricky, I analyzed a way to check for branch codes and then mapping them to respective branches, I immediately thought of map data structure to perform this task.
+6) To calculate top 3 rankers were easy, I thought of sorting the scores of every test format, and got to know about the sort lib in go
+*/
 package main
 
 import (
@@ -8,7 +17,7 @@ import (
 	"strconv"
 	"github.com/xuri/excelize/v2"
 )
-// check
+
 type Student_Record struct { 
 	SlNo       int
 	ClassNo    int
@@ -61,14 +70,13 @@ func main() {
 		"AD": "MANU",
 	}
 
-	// Process each row
 	for i, row := range rows {
 		if i == 0 {
-			continue // Skip header row
+			continue
 		}
 
 		if len(row) < 11 {
-			continue // Skip rows with insufficient data
+			continue 
 		}
 
 		record, err := parseRow(row)
@@ -77,7 +85,6 @@ func main() {
 			continue
 		}
 
-		// Check if the computed Total_Score matches the recorded Total_Score
 		computedTotal_Score := record.Quiz + record.MidSem + record.LabTest + record.WeeklyLabs + record.PreCompre + record.Compre
 		if computedTotal_Score != record.Total_Score {
 			discrepancies = append(discrepancies, fmt.Sprintf("Discrepancy for Emplid %s: Computed Total_Score %.2f != Recorded Total_Score %.2f", record.Emplid, computedTotal_Score, record.Total_Score))
@@ -85,9 +92,8 @@ func main() {
 
 		records = append(records, record)
 
-		// Process only students from 2024 batch
 		if len(record.CampusID) >= 6 && record.CampusID[:4] == "2024" {
-			branchCode := record.CampusID[4:6] // Extract branch code (e.g., "A7", "AA")
+			branchCode := record.CampusID[4:6] 
 
 			if branchName, exists := branchMapping[branchCode]; exists {
 				ba := branchAverages[branchName]
@@ -99,7 +105,6 @@ func main() {
 		}
 	}
 
-	// Calculate general averages
 	var quizSum, midSemSum, labTestSum, weeklyLabsSum, preCompreSum, compreSum, Total_ScoreSum float64
 	for _, record := range records {
 		quizSum += record.Quiz
@@ -120,7 +125,6 @@ func main() {
 	compreAvg := compreSum / numRecords
 	Total_ScoreAvg := Total_ScoreSum / numRecords
 
-	// Print discrepancies
 	if len(discrepancies) > 0 {
 		fmt.Println("Discrepancies found:")
 		for _, d := range discrepancies {
@@ -130,7 +134,6 @@ func main() {
 		fmt.Println("No discrepancies found.")
 	}
 
-	// Print general averages
 	fmt.Printf("\nGeneral Averages:\n")
 	fmt.Printf("Quiz: %.2f\n", quizAvg)
 	fmt.Printf("Mid-Sem: %.2f\n", midSemAvg)
@@ -140,14 +143,12 @@ func main() {
 	fmt.Printf("Compre: %.2f\n", compreAvg)
 	fmt.Printf("Total_Score: %.2f\n", Total_ScoreAvg)
 
-	// Print branch-wise averages
 	fmt.Printf("\nBranch-wise Averages (2024 Only):\n")
 	for branch, ba := range branchAverages {
 		avgTotal_Score := ba.Total_Score / float64(ba.totalnoofstudents)
 		fmt.Printf("Branch average for %s is %.2f\n", branch, avgTotal_Score)
 	}
 
-	// Print top 3 students for each component
 	fmt.Printf("\nTop 3 Students:\n")
 	printTopStudents(records, "Quiz", func(r Student_Record) float64 { return r.Quiz })
 	printTopStudents(records, "Mid-Sem", func(r Student_Record) float64 { return r.MidSem })
@@ -222,4 +223,4 @@ func printTopStudents(records []Student_Record, component string, getScore func(
 	for i := 0; i < 3 && i < len(records); i++ {
 		fmt.Printf("%d. Emplid: %s, Marks: %.2f\n", i+1, records[i].Emplid, getScore(records[i]))
 	}
-}
+} 
